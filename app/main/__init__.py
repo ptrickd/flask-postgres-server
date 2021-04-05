@@ -4,16 +4,9 @@ from flask_sqlalchemy import SQLAlchemy
 
 from .config import config_by_name
 
-
-
 db = SQLAlchemy()
 
-from .model.project import ProjectModel
-
-from app.main.model import project
 from app.main.controller.project_controller import Project
-
-
 
 api = Api()
 api.add_resource(Project,'/api/projects')

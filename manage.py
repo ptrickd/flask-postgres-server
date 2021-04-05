@@ -4,8 +4,8 @@ from flask_script import Manager
 
 from app.main import create_app, db
 
-app = create_app(os.getenv('production') or 'dev')
-
+# app = create_app(os.getenv('production') or 'dev')
+app = create_app('dev')
 app.app_context().push()
 
 manager = Manager(app)
