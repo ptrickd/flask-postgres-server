@@ -9,7 +9,9 @@ db = SQLAlchemy()
 from app.main.controller.project_controller import Project
 
 api = Api()
-api.add_resource(Project,'/api/projects')
+api.add_resource(Project,'/api/projects','/api/projects/<id>')
+
+UPLOAD_FOLDER = 'static/uploads/'
 
 def create_app(config_name):
     app = Flask(__name__,static_folder='./build', static_url_path='/')

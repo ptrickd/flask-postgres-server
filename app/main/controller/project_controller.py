@@ -5,7 +5,7 @@ import json
 # from app.main import app
 from app.main import db
 from app.main.model.project import ProjectModel
-
+from app.main.service.project_service import save_new_project
 
 
 resource_fields = {
@@ -40,14 +40,13 @@ class Project(Resource):
     @marshal_with(resource_fields)
     def get(self):
         result = ProjectModel.query.all()
-        # print(result[0])
-        for project in result:
-            print(project.language)
-        return result
+     
+        return result, 200
 
     @marshal_with(resource_fields)
     def post(self):
         args = post_args.parse_args()
+       
         project = ProjectModel(\
             id = args['id'],\
             project_name = args['project_name'],\
@@ -58,13 +57,11 @@ class Project(Resource):
             _language = args['language'],\
             _framework = args['framework'],\
             _database = args['database'],\
-            _extra_tools = args['extra_tools'] )
+            _extra_tools = args['extra_tools']
+           )
         
-        
-        print('project from controller::',project)
         db.session.add(project)
         db.session.commit()
-        print('project after commit::',project)
-        return project
 
+        return project, 200
 

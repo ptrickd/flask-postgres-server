@@ -6,7 +6,7 @@ from sqlalchemy.sql.expression import cast
 
 
 class ProjectModel(db.Model):
-#   __tablename__ = 'project'
+    __tablename__ = 'project'
 
     id = db.Column(db.Integer, primary_key=True)
     project_name = db.Column(db.String(100), nullable=False)
@@ -18,6 +18,7 @@ class ProjectModel(db.Model):
     _framework  = db.Column('framework',db.JSON(1000), nullable=True,default='[]')
     _database  = db.Column('database',db.JSON(1000), nullable=True,default='[]')
     _extra_tools  = db.Column('extra_tools',db.JSON(1000), nullable=True,default='[]')
+
 
      #define what to display 
     def __repr__(self):
@@ -33,10 +34,12 @@ class ProjectModel(db.Model):
             database={self._database},\n\
             extra_tools={self._extra_tools}\
               )"
-
+# 
+           
     @hybrid_property
     def language(self):
         return json.loads(self._language)
+
 
     @language.setter
     def language(self, language):
