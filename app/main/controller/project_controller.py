@@ -1,11 +1,12 @@
 from flask import Flask
 from flask_restful import Resource, reqparse, abort, fields, marshal_with
 import json
+import werkzeug
 
 # from app.main import app
 from app.main import db
 from app.main.model.project import ProjectModel
-from app.main.service.project_service import save_new_project
+from app.main.util.upload import upload_file
 
 
 resource_fields = {
@@ -18,7 +19,9 @@ resource_fields = {
     'language': fields.List(fields.String),
     'framework': fields.List(fields.String),
     'database':fields.List(fields.String),
-    'extra_tools':fields.List(fields.String)
+    'extra_tools':fields.List(fields.String),
+    'old_filename':fields.String,
+
 }
 
 
@@ -33,7 +36,9 @@ post_args.add_argument("language", action='append', help="Languages list of the 
 post_args.add_argument("framework", action='append', help="Frameworks of the project")
 post_args.add_argument("database", action='append', help="Databases of the project")
 post_args.add_argument("extra_tools", action='append', help="Extra tools of the project")
-
+post_args.add_argument("name", type=str)
+# From file uploads
+post_args.add_argument('image', type=werkzeug.datastructures.FileStorage, location='files')
 
 
 class Project(Resource):
@@ -46,7 +51,11 @@ class Project(Resource):
     @marshal_with(resource_fields)
     def post(self):
         args = post_args.parse_args()
-       
+        new_filename = ''
+        if args['image']:
+            new_filename = upload_file(args['image'])
+        
+        
         project = ProjectModel(\
             id = args['id'],\
             project_name = args['project_name'],\
@@ -57,7 +66,10 @@ class Project(Resource):
             _language = args['language'],\
             _framework = args['framework'],\
             _database = args['database'],\
-            _extra_tools = args['extra_tools']
+            _extra_tools = args['extra_tools'],\
+            old_filename = args['image'].filename,\
+            new_filename = new_filename\
+
            )
         
         db.session.add(project)

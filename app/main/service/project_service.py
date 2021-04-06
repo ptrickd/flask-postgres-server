@@ -1,5 +1,5 @@
-from app.main import db
-from app.main.model.project import Project
+# from app.main import db
+# from app.main.model.project import Project
 
 
 # save_new_project
