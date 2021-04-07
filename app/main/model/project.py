@@ -1,7 +1,7 @@
 from app.main import db
 import json
 from sqlalchemy.ext.hybrid import hybrid_property
-# from sqlalchemy.sql.expression import cast
+
 
 
 class ProjectModel(db.Model):

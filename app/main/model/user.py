@@ -2,16 +2,19 @@ from app.main import db
 from app.main import f_bcrypt
 import json
 from sqlalchemy.ext.hybrid import hybrid_property
-
+from functools import wraps
 
 
 
 class UserModel(db.Model):
     __tablename__ = 'users'
 
+    __table_args__ = (
+        db.UniqueConstraint('username', 'email'),
+      )
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(255), nullable=False)
-    email = db.Column(db.String(255), nullable=False)
+    username = db.Column(db.String(255), nullable=False, unique=True)
+    email = db.Column(db.String(255), nullable=False, unique=True)
     _password = db.Column('password',db.String(1000), nullable=False)
     _roles = db.Column('roles',db.JSON(255), nullable=False)
 
@@ -38,7 +41,8 @@ class UserModel(db.Model):
 
     @password.setter
     def password(self, plaintext):
-        self._password = f_bcrypt.generate_password_hash('plaintext').decode('utf-8')
+        self._password = f_bcrypt.generate_password_hash(plaintext).decode('utf-8')
 
-    # def verify_password(self, plaintext):
-    #     return f_bcrypt.check_password_hash(self.password, plaintext)
+    def verify_password(self, plaintext):##
+        #return true if password is the right
+        return f_bcrypt.check_password_hash(self.password, plaintext)
