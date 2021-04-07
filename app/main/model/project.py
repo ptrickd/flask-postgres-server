@@ -1,8 +1,7 @@
 from app.main import db
 import json
-from sqlalchemy import func
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.sql.expression import cast
+# from sqlalchemy.sql.expression import cast
 
 
 class ProjectModel(db.Model):
@@ -18,8 +17,8 @@ class ProjectModel(db.Model):
     _framework  = db.Column('framework',db.JSON(255), nullable=True,default='[]')
     _database  = db.Column('database',db.JSON(255), nullable=True,default='[]')
     _extra_tools  = db.Column('extra_tools',db.JSON(255), nullable=True,default='[]')
-    old_filename = db.Column('old_filename', db.String(255), nullable=True, default='')
-    new_filename = db.Column('new_filename', db.String(255), nullable=True, default='[')
+    old_filename = db.Column( db.String(255), nullable=True, default='')
+    new_filename = db.Column( db.String(255), nullable=True, default='[')
     
      #define what to display 
     def __repr__(self):

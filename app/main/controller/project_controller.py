@@ -1,6 +1,5 @@
 from flask import Flask
 from flask_restful import Resource, reqparse, abort, fields, marshal_with
-import json
 import werkzeug
 
 # from app.main import app
@@ -36,7 +35,7 @@ post_args.add_argument("language", action='append', help="Languages list of the 
 post_args.add_argument("framework", action='append', help="Frameworks of the project")
 post_args.add_argument("database", action='append', help="Databases of the project")
 post_args.add_argument("extra_tools", action='append', help="Extra tools of the project")
-post_args.add_argument("name", type=str)
+post_args.add_argument("name", type=str, help="Name  of the image")
 # From file uploads
 post_args.add_argument('image', type=werkzeug.datastructures.FileStorage, location='files')
 
