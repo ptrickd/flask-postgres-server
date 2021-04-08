@@ -21,11 +21,12 @@ api.add_resource(User, '/api/users','/api/users/<user_id>')
 api.add_resource(Auth, '/api/login')
 
 
+
 def create_app(config_name):
-    app = Flask(__name__,static_folder='./static', static_url_path='/')
+    app = Flask(__name__,static_folder='../build', static_url_path='')
 
     app.config.from_object(config_by_name[config_name])
-    app.config['UPLOAD_FOLDER'] = 'static/uploads/'
+    app.config['UPLOAD_FOLDER'] = 'build/uploads/'
     db.init_app(app)
     api.init_app(app)
     f_bcrypt.init_app(app)

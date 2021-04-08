@@ -80,3 +80,32 @@ class Project(Resource):
 
         return project, 200
 
+    @token_required
+    @marshal_with(resource_fields)
+    def put(self, current_user):
+        args = post_args.parse_args()
+        new_filename = ''
+        if args['image']:
+            new_filename = upload_file(args['image'])
+        
+        
+        project = ProjectModel(\
+            id = args['id'],\
+            project_name = args['project_name'],\
+            team_name = args['team_name'],\
+            description = args['description'],\
+            repository = args['repository'],\
+            website = args['website'],\
+            _language = args['language'],\
+            _framework = args['framework'],\
+            _database = args['database'],\
+            _extra_tools = args['extra_tools'],\
+            old_filename = args['image'].filename,\
+            new_filename = new_filename\
+
+        )
+        
+        db.session.add(project)
+        db.session.commit()
+
+        return project, 200
