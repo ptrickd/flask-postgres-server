@@ -25,3 +25,11 @@ def index():
 
 if __name__=='__main__':
     manager.run()
+
+
+#scripts
+# python3 manage.py db init
+# export SQLALCHEMY_DATABASE_URI=
+# python3 manage.py db migrate
+# python3 manage.py db upgrade
+# python3 manage.py db --help

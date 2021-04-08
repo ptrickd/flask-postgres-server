@@ -20,7 +20,7 @@ class Auth(Resource):
     @marshal_with(resource_fields)
     def post(self):
         args = post_args.parse_args()
-
+        print('args in auth get')
         if not args['username'] or not args['password']:
             abort(401, message="Crendential must be provided")
 

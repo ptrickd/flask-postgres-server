@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from flask_restful import Resource, reqparse, abort, fields, marshal_with
 import werkzeug
 
@@ -11,11 +11,14 @@ from app.main.util.upload import upload_file
 
 resource_fields = {
     'id': fields.Integer,
+    'cohort_num': fields.String,
+    'project_num': fields.String,
     'project_name': fields.String,
     'team_name': fields.String,
     'description': fields.String,
     'repository': fields.String,
     'website': fields.String,
+    'name_team_member': fields.List(fields.String),
     'language': fields.List(fields.String),
     'framework': fields.List(fields.String),
     'database':fields.List(fields.String),
@@ -27,11 +30,14 @@ resource_fields = {
 
 post_args = reqparse.RequestParser()
 post_args.add_argument("id",  type=int, help="Id of the project")
+post_args.add_argument("cohort_num",  type=str, help="Cohort of the project")
+post_args.add_argument("project_num",  type=str, help="Project number of the project")
 post_args.add_argument("project_name",  type=str, help="Name of the project")
 post_args.add_argument("team_name",  type=str, help="Name of the team")
 post_args.add_argument("description",  type=str, help="Description of the project")
 post_args.add_argument("repository",  type=str, help="Repository of the project")
 post_args.add_argument("website",  type=str, help="Website of the project")
+post_args.add_argument("name_team_member", action='append', help="Names of the team")
 post_args.add_argument("language", action='append', help="Languages list of the projects")
 post_args.add_argument("framework", action='append', help="Frameworks of the project")
 post_args.add_argument("database", action='append', help="Databases of the project")
@@ -43,12 +49,29 @@ post_args.add_argument('image', type=werkzeug.datastructures.FileStorage, locati
 post_args.add_argument('x-access-token', location='headers')
 
 class Project(Resource):
-    @token_required
     @marshal_with(resource_fields)
-    def get(self, current_user):
-        result = ProjectModel.query.all()
+    def get(self):
+        # print('project get')
+        # new_dict = {}
+        # if request.args:
+        #     print('request.arges')
+        #     args = request.args
+        #     serialized = ','.join(f"{k}:{v}" for k,v in request.args.items())
+        #     print(serialized)
      
+        result = ProjectModel.query.all()
+        print('print result :::',result)
         return result, 200
+
+    @marshal_with(resource_fields)
+    def get(self, project_id):
+        print('project id ::::', project_id)
+        project = ProjectModel.query.filter_by(id=project_id).first()
+        print('prject with id', project)
+        if not project:
+            abort(401, message="This project has not been found")
+
+        return project
 
     @token_required
     @marshal_with(resource_fields)
@@ -61,11 +84,14 @@ class Project(Resource):
         
         project = ProjectModel(\
             id = args['id'],\
+            cohort_num = args['cohort_num'],\
+            project_num = args['project_num'],\
             project_name = args['project_name'],\
             team_name = args['team_name'],\
             description = args['description'],\
             repository = args['repository'],\
             website = args['website'],\
+            _name_team_member = args['name_team_member'],\
             _language = args['language'],\
             _framework = args['framework'],\
             _database = args['database'],\
@@ -91,6 +117,8 @@ class Project(Resource):
         
         project = ProjectModel(\
             id = args['id'],\
+            cohort_num = args['cohort_num'],\
+            project_num = args['project_num'],\
             project_name = args['project_name'],\
             team_name = args['team_name'],\
             description = args['description'],\

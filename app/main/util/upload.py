@@ -31,7 +31,7 @@ def upload_file(file):
         old_filename = filename
         filename = name + '-' + shortuuid.uuid() + '.' + extension
         
-        file.save(os.path.join('static/uploads/', filename))
+        file.save(os.path.join('app/build/uploads/', filename))
 
         
     return filename
