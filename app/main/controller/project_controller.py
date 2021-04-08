@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from flask_restful import Resource, reqparse, abort, fields, marshal_with
 import werkzeug
 
@@ -43,9 +43,14 @@ post_args.add_argument('image', type=werkzeug.datastructures.FileStorage, locati
 post_args.add_argument('x-access-token', location='headers')
 
 class Project(Resource):
-    @token_required
     @marshal_with(resource_fields)
-    def get(self, current_user):
+    def get(self):
+        print('project get')
+        if request.args:
+            print('request.arges')
+            args = request.args
+            serialized = ','.join(f"{k}:{v}" for k,v in request.args.items())
+            print(serialized)
         result = ProjectModel.query.all()
      
         return result, 200

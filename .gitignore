@@ -1,3 +1,6 @@
+#Alembic and flask-migrate
+migrations
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

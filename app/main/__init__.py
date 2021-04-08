@@ -13,13 +13,13 @@ f_bcrypt = Bcrypt()
 from app.main.controller.project_controller import Project
 from app.main.controller.user_controller import User
 from app.main.controller.auth_controller import Auth
-
+from app.main.controller.init_controller import Tool
 
 api = Api()
-api.add_resource(Project,'/api/projects','/api/projects/<project_id>')
-api.add_resource(User, '/api/users','/api/users/<user_id>')
-api.add_resource(Auth, '/api/login')
-
+api.add_resource(Project,'/api/project','/api/project/<project_id>')
+api.add_resource(User, '/api/users','/api/users/<cohort_num>/<project_num>/<name>')
+api.add_resource(Auth, '/api/auth/signin')
+api.add_resource(Tool, '/api/init/<route_option>')
 
 
 def create_app(config_name):
@@ -31,5 +31,4 @@ def create_app(config_name):
     api.init_app(app)
     f_bcrypt.init_app(app)
   
-
     return app
