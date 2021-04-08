@@ -5,6 +5,7 @@ import werkzeug
 # from app.main import app
 from app.main import db
 from app.main.model.project import ProjectModel
+from app.main.model.user import token_required
 from app.main.util.upload import upload_file
 
 
@@ -38,17 +39,20 @@ post_args.add_argument("extra_tools", action='append', help="Extra tools of the 
 post_args.add_argument("name", type=str, help="Name  of the image")
 # From file uploads
 post_args.add_argument('image', type=werkzeug.datastructures.FileStorage, location='files')
-
+# From the request headers
+post_args.add_argument('x-access-token', location='headers')
 
 class Project(Resource):
+    @token_required
     @marshal_with(resource_fields)
-    def get(self):
+    def get(self, current_user):
         result = ProjectModel.query.all()
      
         return result, 200
 
+    @token_required
     @marshal_with(resource_fields)
-    def post(self):
+    def post(self, current_user):
         args = post_args.parse_args()
         new_filename = ''
         if args['image']:
