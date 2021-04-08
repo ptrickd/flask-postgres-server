@@ -1,6 +1,7 @@
 #Alembic and flask-migrate
 migrations
 app/build/uploads/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

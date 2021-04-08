@@ -26,7 +26,6 @@ class Tool(Resource):
         if route_option == 'students':
             to_return = StudentModel.query.all()
         return to_return
-
     @marshal_with(resource_fields)
     def post(self,route_option):
         args = post_args.parse_args()
