@@ -20,6 +20,16 @@ post_args.add_argument('roles', action='append', help='Roles of the user')
 
 class User(Resource):
     @marshal_with(resource_fields)
+    def get(self, user_id):
+
+        user = UserModel.query.filter_by(id=user_id).first()
+        
+        if not user:
+            abort(401, message="User not found")
+
+        return user
+
+    @marshal_with(resource_fields)
     def post(self):
         args = post_args.parse_args()
         

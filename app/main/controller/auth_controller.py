@@ -7,7 +7,8 @@ resource_fields = {
     'id': fields.Integer,
     'username': fields.String,
     'email': fields.String,
-    'roles': fields.List(fields.String)
+    'roles': fields.List(fields.String),
+    'access_token':fields.String
 
 }
 
@@ -29,11 +30,9 @@ class Auth(Resource):
             abort(401, message="Wrong credential")
         print(user)
 
-        if not UserModel.verify_password(user, args['password']):
+        if not user.verify_password(args['password']):
             abort(401, message="Wrong credential")
 
-        
-
-
+        user.access_token = user.encrypt_token()
 
         return user

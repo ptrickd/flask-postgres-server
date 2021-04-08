@@ -17,7 +17,7 @@ from app.main.controller.auth_controller import Auth
 
 api = Api()
 api.add_resource(Project,'/api/projects','/api/projects/<project_id>')
-api.add_resource(User, '/api/users','/api/users<user_id>')
+api.add_resource(User, '/api/users','/api/users/<user_id>')
 api.add_resource(Auth, '/api/login')
 
 
@@ -26,7 +26,6 @@ def create_app(config_name):
 
     app.config.from_object(config_by_name[config_name])
     app.config['UPLOAD_FOLDER'] = 'static/uploads/'
-    app.config['SECRET_KEY'] = 'thisismysecret'
     db.init_app(app)
     api.init_app(app)
     f_bcrypt.init_app(app)

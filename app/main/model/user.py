@@ -1,9 +1,12 @@
-from app.main import db
-from app.main import f_bcrypt
+from flask_restful import reqparse, abort
+from app.main import db, f_bcrypt
+import app
 import json
 from sqlalchemy.ext.hybrid import hybrid_property
 from functools import wraps
-
+import jwt
+import datetime
+from os import environ
 
 
 class UserModel(db.Model):
@@ -46,3 +49,33 @@ class UserModel(db.Model):
     def verify_password(self, plaintext):##
         #return true if password is the right
         return f_bcrypt.check_password_hash(self.password, plaintext)
+
+    def encrypt_token(self):
+
+        token = jwt.encode({'user_id':self.id,\
+            'exp':datetime.datetime.utcnow() + datetime.timedelta(minutes=1440)},\
+            environ.get('SECRET_KEY'), algorithm="HS256")
+        
+        return token
+    
+def decrypt_token(self, f):
+    @wraps(self, f)
+    def decorated(*args, **kwargs):
+        token = None
+        args = reqparse.RequestParser()
+        # From the request headers
+        args.add_argument('x-access-token', location='headers')
+        if args['x-access-tken']:
+            token = args['x-access-token']
+        else:
+            abort(401, message="Token not provided")
+        
+        try:
+            data = jwt.decode(token, environ.get('SECRET_KEY'), algorithms=['HS256'])
+            current_user = UserModel.query.filter_by(id=data['user_id']).first()
+        except:
+            abort(401, messge='Token not valid')
+        
+        return f(current_user, *args, **kwargs)
+
+    return decorated
