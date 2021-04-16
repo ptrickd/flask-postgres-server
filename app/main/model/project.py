@@ -16,7 +16,7 @@ class ProjectModel(db.Model):
     repository = db.Column(db.String(255), nullable=True)
     website = db.Column(db.String(255), nullable=True)
     _name_team_member = db.Column('name_team_member',db.JSON(255), nullable=True,default='[]')
-    # _language = db.Column('language',db.JSON(255), nullable=True,default='[]')
+    _language = db.Column('language',db.JSON(255), nullable=True,default='[]')
     _framework  = db.Column('framework',db.JSON(255), nullable=True,default='[]')
     _database  = db.Column('database',db.JSON(255), nullable=True,default='[]')
     _extra_tools  = db.Column('extra_tools',db.JSON(255), nullable=True,default='[]')
@@ -50,8 +50,14 @@ class ProjectModel(db.Model):
     def name_team_member(self, name_team_member):
         self._name_team_member = json.dumps(name_team_member)
 
- 
-      
+    @hybrid_property
+    def language(self):
+        return json.loads(self._language)
+
+    @language.setter
+    def language(self, language):
+        self._language = json.dumps(language)
+    
     @hybrid_property
     def framework(self):
         return json.loads(self._framework)

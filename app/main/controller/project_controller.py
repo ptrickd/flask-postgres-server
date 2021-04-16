@@ -1,7 +1,8 @@
 from flask import Flask, request
-from flask_restful import Resource, reqparse, abort, fields, marshal_with
+from flask_restful import Resource, reqparse, abort, fields, marshal_with, marshal
 from sqlalchemy import or_
 import werkzeug
+import json
 
 # from app.main import app
 from app.main import db
@@ -15,6 +16,9 @@ from app.main.model.extra_tools import ExtraToolsModel
 from app.main.model.user import token_required
 from app.main.util.upload import upload_file
 
+array_fields = {
+    'name': fields.String
+}
 
 resource_fields = {
     '_id': fields.Integer,
@@ -25,7 +29,7 @@ resource_fields = {
     'description': fields.String,
     'repository': fields.String,
     'website': fields.String,
-    # 'name_team_member': fields.List(fields.String),
+    'name_team_member': fields.List(fields.String),
     # 'language': fields.List(fields.String),
     # 'framework': fields.List(fields.String),
     # 'database':fields.List(fields.String),
@@ -74,9 +78,9 @@ class Projects(Resource):
         cohort_num = parsed_args['cohort'][0]
         project_num = parsed_args['projectnum'][0]
         student_name = parsed_args['name'][0]
-        # languages = parsed_args['languages']
-        # frontend = parsed_args['frontend']
-        # backend = parsed_args['backend']
+        languages = parsed_args['languages']
+        frontend = parsed_args['frontend']
+        backend = parsed_args['backend']
         projects = None
 
         # print(parsed_args['languages'])
@@ -111,6 +115,11 @@ class Projects(Resource):
             project_num = args['project_num'],\
             project_name = args['project_name'],\
             team_name = args['team_name'],\
+            _name_team_member = args['name_team_member'],\
+            _language = args['language'],\
+            _framework = args['framework'],\
+            _database = args['database'],\
+            _extra_tools = args['extra_tools'],\
             description = args['description'],\
             repository = args['repository'],\
             website = args['website'],\
@@ -118,8 +127,10 @@ class Projects(Resource):
             new_filename = new_filename\
 
            )
+
         db.session.add(project)
         db.session.commit()
+
         for name in args['name_team_member']:
             names = TeamMemberNameModel(\
                 id = args['_id'],
@@ -160,8 +171,8 @@ class Projects(Resource):
                 )
             db.session.add(extra_tools)
         
-        print('project id',project.id)
         db.session.commit()
+        
         return project, 200
 
     @token_required
@@ -182,10 +193,6 @@ class Projects(Resource):
             description = args['description'],\
             repository = args['repository'],\
             website = args['website'],\
-            _language = args['language'],\
-            _framework = args['framework'],\
-            _database = args['database'],\
-            _extra_tools = args['extra_tools'],\
             old_filename = args['image'].filename,\
             new_filename = new_filename\
 
