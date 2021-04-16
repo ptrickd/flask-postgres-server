@@ -1,16 +1,18 @@
 from flask import Flask, request
 from flask_restful import Resource, reqparse, abort, fields, marshal_with
+from sqlalchemy import or_
 import werkzeug
 
 # from app.main import app
 from app.main import db
 from app.main.model.project import ProjectModel
+from app.main.model.languages import LanguagesModel
 from app.main.model.user import token_required
 from app.main.util.upload import upload_file
 
 
 resource_fields = {
-    'id': fields.Integer,
+    '_id': fields.Integer,
     'cohort_num': fields.String,
     'project_num': fields.String,
     'project_name': fields.String,
@@ -19,7 +21,7 @@ resource_fields = {
     'repository': fields.String,
     'website': fields.String,
     'name_team_member': fields.List(fields.String),
-    'language': fields.List(fields.String),
+    # 'language': fields.List(fields.String),
     'framework': fields.List(fields.String),
     'database':fields.List(fields.String),
     'extra_tools':fields.List(fields.String),
@@ -29,7 +31,7 @@ resource_fields = {
 
 
 post_args = reqparse.RequestParser()
-post_args.add_argument("id",  type=int, help="Id of the project")
+post_args.add_argument("_id",type=int, help="Id of the project")
 post_args.add_argument("cohort_num",  type=str, help="Cohort of the project")
 post_args.add_argument("project_num",  type=str, help="Project number of the project")
 post_args.add_argument("project_name",  type=str, help="Name of the project")
@@ -50,20 +52,6 @@ post_args.add_argument('x-access-token', location='headers')
 
 class Project(Resource):
     @marshal_with(resource_fields)
-    def get(self):
-        # print('project get')
-        # new_dict = {}
-        # if request.args:
-        #     print('request.arges')
-        #     args = request.args
-        #     serialized = ','.join(f"{k}:{v}" for k,v in request.args.items())
-        #     print(serialized)
-     
-        result = ProjectModel.query.all()
-        print('print result :::',result)
-        return result, 200
-
-    @marshal_with(resource_fields)
     def get(self, project_id):
         print('project id ::::', project_id)
         project = ProjectModel.query.filter_by(id=project_id).first()
@@ -72,6 +60,36 @@ class Project(Resource):
             abort(401, message="This project has not been found")
 
         return project
+
+class Projects(Resource):
+    @marshal_with(resource_fields)
+    def get(self):
+        args = request.args
+        parsed_args = args.to_dict(flat=False)
+        cohort_num = parsed_args['cohort'][0]
+        project_num = parsed_args['projectnum'][0]
+        student_name = parsed_args['name'][0]
+        # languages = parsed_args['languages']
+        # frontend = parsed_args['frontend']
+        # backend = parsed_args['backend']
+        projects = None
+
+        # print(parsed_args['languages'])
+
+        if not any([cohort_num, project_num, student_name]):
+            projects = ProjectModel.query.all()
+        else:
+            projects = ProjectModel.query.filter(or_(\
+                (ProjectModel.cohort_num==cohort_num),\
+                (ProjectModel.project_num==project_num),
+                (student_name.in_(ProjectModel.name_team_member))))\
+                .all()
+ 
+        # print(projects)filter_by(project_num=project_num).
+        # for project in projects:
+        #     project._id = project.id
+        # print('projects to be rerturned',projects)
+        return projects, 200
 
     @token_required
     @marshal_with(resource_fields)
@@ -83,7 +101,7 @@ class Project(Resource):
         
         
         project = ProjectModel(\
-            id = args['id'],\
+            id = args['_id'],\
             cohort_num = args['cohort_num'],\
             project_num = args['project_num'],\
             project_name = args['project_name'],\
@@ -92,7 +110,7 @@ class Project(Resource):
             repository = args['repository'],\
             website = args['website'],\
             _name_team_member = args['name_team_member'],\
-            _language = args['language'],\
+            # _language = args['language'],\
             _framework = args['framework'],\
             _database = args['database'],\
             _extra_tools = args['extra_tools'],\
@@ -100,10 +118,24 @@ class Project(Resource):
             new_filename = new_filename\
 
            )
-        
         db.session.add(project)
         db.session.commit()
-
+        print(project)
+        for item in args['language']:
+            print(item)
+            languages = LanguagesModel(\
+                id = args['_id'],
+                project_id = project.id,
+                name = item
+                )
+            db.session.add(languages)
+            print(languages)
+        
+        
+        
+        
+        print('project id',project.id)
+        db.session.commit()
         return project, 200
 
     @token_required
@@ -116,7 +148,7 @@ class Project(Resource):
         
         
         project = ProjectModel(\
-            id = args['id'],\
+            id = args['_id'],\
             cohort_num = args['cohort_num'],\
             project_num = args['project_num'],\
             project_name = args['project_name'],\

@@ -16,12 +16,12 @@ class ProjectModel(db.Model):
     repository = db.Column(db.String(255), nullable=True)
     website = db.Column(db.String(255), nullable=True)
     _name_team_member = db.Column('name_team_member',db.JSON(255), nullable=True,default='[]')
-    _language = db.Column('language',db.JSON(255), nullable=True,default='[]')
+    # _language = db.Column('language',db.JSON(255), nullable=True,default='[]')
     _framework  = db.Column('framework',db.JSON(255), nullable=True,default='[]')
     _database  = db.Column('database',db.JSON(255), nullable=True,default='[]')
     _extra_tools  = db.Column('extra_tools',db.JSON(255), nullable=True,default='[]')
     old_filename = db.Column( db.String(255), nullable=True, default='')
-    new_filename = db.Column( db.String(255), nullable=True, default='[')
+    new_filename = db.Column( db.String(255), nullable=True, default='')
     
      #define what to display 
     def __repr__(self):
@@ -35,14 +35,13 @@ class ProjectModel(db.Model):
             repository = {self.repository},\n\
             website = {self.website},\n\
             name_team_member={self._name_team_member},\n\
-            language={self._language},\n\
             framework={self._framework},\n\
             database={self._database},\n\
             extra_tools={self._extra_tools},\n\
             old_filename={self.old_filename},\n\
             new_filename={self.new_filename}\
               )"
-# 
+
     @hybrid_property
     def name_team_member(self):
         if self._name_team_member == None:
@@ -51,17 +50,10 @@ class ProjectModel(db.Model):
 
 
     @name_team_member.setter
-    def language(self, name_team_member):
+    def name_team_member(self, name_team_member):
         self._name_team_member = json.dumps(name_team_member)
 
-    @hybrid_property
-    def language(self):
-        return json.loads(self._language)
-
-
-    @language.setter
-    def language(self, language):
-        self._language = json.dumps(language)
+ 
       
     @hybrid_property
     def framework(self):
@@ -86,5 +78,26 @@ class ProjectModel(db.Model):
     @extra_tools.setter
     def extra_tools(self, extra_tools):
         self._extra_tools = json.dumps(extra_tools)
+
+# class LanguagesModel(db.Model):
+#     __tablename__ = 'languages'
+
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(100), nullable=False)
+
+#     #Relationship with project 
+#     project_id = db.Column(db.ForeignKey, nullable=False)
+#     project = orm.relationship(ProjectModel, backref=orm.backref('languages', order_by=id, cascade="all, delete, delete-orphan") )
+
+#     #Relationship 
+
+#     def __repr__(self):
+#         return f"Languages(\n\
+#             id = {self.id},\n\
+#             project_id = {self.project_id},\n\
+#             name = {self.name}\n\
+#             )"
+# # 
+    
 
 
