@@ -35,9 +35,6 @@ class ProjectModel(db.Model):
             repository = {self.repository},\n\
             website = {self.website},\n\
             name_team_member={self._name_team_member},\n\
-            framework={self._framework},\n\
-            database={self._database},\n\
-            extra_tools={self._extra_tools},\n\
             old_filename={self.old_filename},\n\
             new_filename={self.new_filename}\
               )"

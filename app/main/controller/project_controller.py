@@ -6,7 +6,12 @@ import werkzeug
 # from app.main import app
 from app.main import db
 from app.main.model.project import ProjectModel
-from app.main.model.languages import LanguagesModel
+
+from app.main.model.team_member_name import TeamMemberNameModel
+from app.main.model.language import LanguageModel
+from app.main.model.framework import FrameworkModel
+from app.main.model.database import DatabaseModel
+from app.main.model.extra_tools import ExtraToolsModel
 from app.main.model.user import token_required
 from app.main.util.upload import upload_file
 
@@ -20,11 +25,11 @@ resource_fields = {
     'description': fields.String,
     'repository': fields.String,
     'website': fields.String,
-    'name_team_member': fields.List(fields.String),
+    # 'name_team_member': fields.List(fields.String),
     # 'language': fields.List(fields.String),
-    'framework': fields.List(fields.String),
-    'database':fields.List(fields.String),
-    'extra_tools':fields.List(fields.String),
+    # 'framework': fields.List(fields.String),
+    # 'database':fields.List(fields.String),
+    # 'extra_tools':fields.List(fields.String),
     'old_filename':fields.String,
 
 }
@@ -109,30 +114,51 @@ class Projects(Resource):
             description = args['description'],\
             repository = args['repository'],\
             website = args['website'],\
-            _name_team_member = args['name_team_member'],\
-            # _language = args['language'],\
-            _framework = args['framework'],\
-            _database = args['database'],\
-            _extra_tools = args['extra_tools'],\
             old_filename = args['image'].filename,\
             new_filename = new_filename\
 
            )
         db.session.add(project)
         db.session.commit()
-        print(project)
+        for name in args['name_team_member']:
+            names = TeamMemberNameModel(\
+                id = args['_id'],
+                project_id = project.id,
+                name = name
+                )
+            db.session.add(names)
+
         for item in args['language']:
-            print(item)
-            languages = LanguagesModel(\
+            languages = LanguageModel(\
                 id = args['_id'],
                 project_id = project.id,
                 name = item
                 )
             db.session.add(languages)
-            print(languages)
+            
+        for item in args['framework']:
+            frameworks = FrameworkModel(\
+                id = args['_id'],
+                project_id = project.id,
+                name = item
+                )
+            db.session.add(frameworks)
+            
+        for item in args['database']:
+            databases = DatabaseModel(\
+                id = args['_id'],
+                project_id = project.id,
+                name = item
+                )
+            db.session.add(databases)
         
-        
-        
+        for item in args['extra_tools']:
+            extra_tools = ExtraToolsModel(\
+                id = args['_id'],
+                project_id = project.id,
+                name = item
+                )
+            db.session.add(extra_tools)
         
         print('project id',project.id)
         db.session.commit()
