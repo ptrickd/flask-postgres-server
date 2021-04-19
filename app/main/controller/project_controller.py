@@ -1,6 +1,7 @@
 from flask import Flask, request
 from flask_restful import Resource, reqparse, abort, fields, marshal_with, marshal
 from sqlalchemy import or_
+from sqlalchemy.sql.expression import null
 import werkzeug
 import json
 
@@ -21,7 +22,7 @@ array_fields = {
 }
 
 resource_fields = {
-    '_id': fields.Integer,
+    '_id': fields.Integer(attribute='id'),
     'cohort_num': fields.String,
     'project_num': fields.String,
     'project_name': fields.String,
@@ -29,11 +30,11 @@ resource_fields = {
     'description': fields.String,
     'repository': fields.String,
     'website': fields.String,
-    'name_team_member': fields.List(fields.String),
-    # 'language': fields.List(fields.String),
-    # 'framework': fields.List(fields.String),
-    # 'database':fields.List(fields.String),
-    # 'extra_tools':fields.List(fields.String),
+    'name_team_member': fields.List(fields.Nested(array_fields)),
+    'language': fields.List(fields.Nested(array_fields)),
+    'framework': fields.List(fields.Nested(array_fields)),
+    'database':fields.List(fields.Nested(array_fields)),
+    'extra_tools':fields.List(fields.Nested(array_fields)),
     'old_filename':fields.String,
 
 }
@@ -73,31 +74,31 @@ class Project(Resource):
 class Projects(Resource):
     @marshal_with(resource_fields)
     def get(self):
+        #parsing from url query
         args = request.args
+        filter_data = {}
+        
         parsed_args = args.to_dict(flat=False)
-        cohort_num = parsed_args['cohort'][0]
-        project_num = parsed_args['projectnum'][0]
-        student_name = parsed_args['name'][0]
-        languages = parsed_args['languages']
+        filter_data['cohort_num'] = parsed_args['cohort'][0]
+        filter_data['project_num'] = parsed_args['projectnum'][0]
+        name = parsed_args['name'][0]
+        languages = None
+        if 'languages' in parsed_args:
+            print('yaaaaaaaaaaaaaaaaaaa')
+            print(parsed_args['languages'])
+            languages = parsed_args['languages']
         frontend = parsed_args['frontend']
         backend = parsed_args['backend']
-        projects = None
+        
+        filter_data = {key: value for (key, value) in filter_data.items() if value}
 
-        # print(parsed_args['languages'])
-
-        if not any([cohort_num, project_num, student_name]):
-            projects = ProjectModel.query.all()
-        else:
-            projects = ProjectModel.query.filter(or_(\
-                (ProjectModel.cohort_num==cohort_num),\
-                (ProjectModel.project_num==project_num),
-                (student_name.in_(ProjectModel.name_team_member))))\
-                .all()
- 
-        # print(projects)filter_by(project_num=project_num).
-        # for project in projects:
-        #     project._id = project.id
-        # print('projects to be rerturned',projects)
+        projects = ProjectModel\
+            .query\
+            .filter_by(**filter_data)\
+            .all()
+        
+       
+      
         return projects, 200
 
     @token_required
@@ -115,11 +116,6 @@ class Projects(Resource):
             project_num = args['project_num'],\
             project_name = args['project_name'],\
             team_name = args['team_name'],\
-            _name_team_member = args['name_team_member'],\
-            _language = args['language'],\
-            _framework = args['framework'],\
-            _database = args['database'],\
-            _extra_tools = args['extra_tools'],\
             description = args['description'],\
             repository = args['repository'],\
             website = args['website'],\
@@ -134,11 +130,12 @@ class Projects(Resource):
         for name in args['name_team_member']:
             names = TeamMemberNameModel(\
                 id = args['_id'],
-                project_id = project.id,
-                name = name
+                name = name,
+                project_id = project.id
                 )
             db.session.add(names)
-
+            db.session.commit()
+        
         for item in args['language']:
             languages = LanguageModel(\
                 id = args['_id'],
@@ -146,6 +143,7 @@ class Projects(Resource):
                 name = item
                 )
             db.session.add(languages)
+            db.session.commit()
             
         for item in args['framework']:
             frameworks = FrameworkModel(\
@@ -154,7 +152,8 @@ class Projects(Resource):
                 name = item
                 )
             db.session.add(frameworks)
-            
+            db.session.commit()
+
         for item in args['database']:
             databases = DatabaseModel(\
                 id = args['_id'],
@@ -162,7 +161,8 @@ class Projects(Resource):
                 name = item
                 )
             db.session.add(databases)
-        
+            db.session.commit()
+
         for item in args['extra_tools']:
             extra_tools = ExtraToolsModel(\
                 id = args['_id'],
@@ -170,9 +170,9 @@ class Projects(Resource):
                 name = item
                 )
             db.session.add(extra_tools)
+            db.session.commit()
         
-        db.session.commit()
-        
+
         return project, 200
 
     @token_required

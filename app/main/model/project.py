@@ -1,7 +1,8 @@
+from sqlalchemy.orm import backref
 from app.main import db
 import json
 from sqlalchemy.ext.hybrid import hybrid_property
-
+# from app.main.model.team_member_name import TeamMemberNameModel
 
 
 class ProjectModel(db.Model):
@@ -15,15 +16,16 @@ class ProjectModel(db.Model):
     description = db.Column(db.String(10000), nullable=False)
     repository = db.Column(db.String(255), nullable=True)
     website = db.Column(db.String(255), nullable=True)
-    _name_team_member = db.Column('name_team_member',db.JSON(255), nullable=True,default='[]')
-    _language = db.Column('language',db.JSON(255), nullable=True,default='[]')
-    _framework  = db.Column('framework',db.JSON(255), nullable=True,default='[]')
-    _database  = db.Column('database',db.JSON(255), nullable=True,default='[]')
-    _extra_tools  = db.Column('extra_tools',db.JSON(255), nullable=True,default='[]')
+    
     old_filename = db.Column( db.String(255), nullable=True, default='')
     new_filename = db.Column( db.String(255), nullable=True, default='')
     
-     #define what to display 
+    name_team_member = db.relationship('TeamMemberNameModel', backref='project', lazy='dynamic')
+    language = db.relationship('LanguageModel', backref='project', lazy='dynamic')
+    framework  = db.relationship('FrameworkModel', backref='project', lazy='dynamic')
+    database  = db.relationship('DatabaseModel', backref='project', lazy='dynamic')
+    extra_tools  = db.relationship('ExtraToolsModel', backref='project', lazy='dynamic')
+     #define what to display db.relationship('Pet', backref='owner')
     def __repr__(self):
         return f"Project(\n\
             id = {self.id},\n\
@@ -39,48 +41,48 @@ class ProjectModel(db.Model):
             new_filename={self.new_filename}\
               )"
 
-    @hybrid_property
-    def name_team_member(self):
-        if self._name_team_member == None:
-            return []
-        return json.loads(self._name_team_member)
+    # @hybrid_property
+    # def name_team_member(self):
+    #     if self._name_team_member == None:
+    #         return []
+    #     return json.loads(self._name_team_member)
 
 
-    @name_team_member.setter
-    def name_team_member(self, name_team_member):
-        self._name_team_member = json.dumps(name_team_member)
+    # @name_team_member.setter
+    # def name_team_member(self, name_team_member):
+    #     self._name_team_member = json.dumps(name_team_member)
 
-    @hybrid_property
-    def language(self):
-        return json.loads(self._language)
+    # @hybrid_property
+    # def language(self):
+    #     return json.loads(self._language)
 
-    @language.setter
-    def language(self, language):
-        self._language = json.dumps(language)
+    # @language.setter
+    # def language(self, language):
+    #     self._language = json.dumps(language)
     
-    @hybrid_property
-    def framework(self):
-        return json.loads(self._framework)
+    # @hybrid_property
+    # def framework(self):
+    #     return json.loads(self._framework)
 
-    @framework.setter
-    def framework(self, framework):
-        self._framework = json.dumps(framework)
+    # @framework.setter
+    # def framework(self, framework):
+    #     self._framework = json.dumps(framework)
 
-    @hybrid_property
-    def database(self):
-        return json.loads(self._database)
+    # @hybrid_property
+    # def database(self):
+    #     return json.loads(self._database)
 
-    @database.setter
-    def database(self, database):
-        self._database = json.dumps(database)
+    # @database.setter
+    # def database(self, database):
+    #     self._database = json.dumps(database)
 
-    @hybrid_property
-    def extra_tools(self):
-        return json.loads(self._extra_tools)
+    # @hybrid_property
+    # def extra_tools(self):
+    #     return json.loads(self._extra_tools)
 
-    @extra_tools.setter
-    def extra_tools(self, extra_tools):
-        self._extra_tools = json.dumps(extra_tools)
+    # @extra_tools.setter
+    # def extra_tools(self, extra_tools):
+    #     self._extra_tools = json.dumps(extra_tools)
 
 # class LanguagesModel(db.Model):
 #     __tablename__ = 'languages'
