@@ -8,7 +8,7 @@ class DevConfig(Config):
 
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = environ.get("SQLALCHEMY_DATABASE_URI")
-    SQLALCHEMY_ECHO = True# Set to true to log database activity for debug
+    #SQLALCHEMY_ECHO = True# Set to true to log database activity for debug
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = environ.get('SECRET_KEY')
 

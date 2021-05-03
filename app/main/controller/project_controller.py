@@ -1,5 +1,5 @@
 from flask import Flask, request
-from flask_restful import Resource, reqparse, abort, fields, marshal_with, marshal
+from flask_restful import Resource, reqparse, abort, fields, marshal_with
 from sqlalchemy import or_
 from sqlalchemy.sql.expression import null
 import werkzeug
@@ -17,10 +17,6 @@ from app.main.model.extra_tools import ExtraToolsModel
 from app.main.model.user import token_required
 from app.main.util.upload import upload_file
 
-array_fields = {
-    'name': fields.String
-}
-
 resource_fields = {
     '_id': fields.Integer(attribute='id'),
     'cohort_num': fields.String,
@@ -30,11 +26,11 @@ resource_fields = {
     'description': fields.String,
     'repository': fields.String,
     'website': fields.String,
-    'name_team_member': fields.List(fields.Nested(array_fields)),
-    'language': fields.List(fields.Nested(array_fields)),
-    'framework': fields.List(fields.Nested(array_fields)),
-    'database':fields.List(fields.Nested(array_fields)),
-    'extra_tools':fields.List(fields.Nested(array_fields)),
+    'name_team_member': fields.List(fields.String(attribute='name')),
+    'language': fields.List(fields.String(attribute='name')),
+    'framework': fields.List(fields.String(attribute='name')),
+    'database':fields.List(fields.String(attribute='name')),
+    'extra_tools':fields.List(fields.String(attribute='name')),
     'old_filename':fields.String,
 
 }
@@ -77,28 +73,78 @@ class Projects(Resource):
         #parsing from url query
         args = request.args
         filter_data = {}
-        
+        ids = []
+
         parsed_args = args.to_dict(flat=False)
         filter_data['cohort_num'] = parsed_args['cohort'][0]
         filter_data['project_num'] = parsed_args['projectnum'][0]
-        name = parsed_args['name'][0]
-        languages = None
-        if 'languages' in parsed_args:
-            print('yaaaaaaaaaaaaaaaaaaa')
-            print(parsed_args['languages'])
-            languages = parsed_args['languages']
-        frontend = parsed_args['frontend']
-        backend = parsed_args['backend']
-        
-        filter_data = {key: value for (key, value) in filter_data.items() if value}
 
-        projects = ProjectModel\
+        name_team_member_id = TeamMemberNameModel\
+            .query.with_entities(TeamMemberNameModel.project_id)\
+            .filter_by(name=parsed_args['name'][0])\
+            .all()
+        for id in name_team_member_id:
+            ids.append(id[0])
+
+
+        if 'languages' in parsed_args:
+            languages = []
+
+            for language in parsed_args['languages']:
+                languages.append(language)
+
+            language_ids = LanguageModel\
+                .query.with_entities(LanguageModel.project_id)\
+                .filter(LanguageModel.name.in_(languages))\
+                .all()
+
+            for id in language_ids:
+                ids.append(id[0])
+
+
+        if 'frontend' in parsed_args:
+            frameworks = []
+            for framework in frameworks:
+                frameworks.append(framework)
+
+            framework_ids = FrameworkModel\
+                .query.with_entities(FrameworkModel.project_id)\
+                .filter(FrameworkModel.name.in_(frameworks))\
+                .all()
+            for id in framework_ids:
+                ids.append(id[0])
+
+        if 'backend' in parsed_args:
+            databases = []
+            for database in databases:
+                ids.append(id[0])
+
+            database_ids = DatabaseModel\
+                .query.with_entities(DatabaseModel.project_id)\
+                .filter(DatabaseModel.name.in_(databases))\
+                .all()
+            for id in database_ids:
+                ids.append(id[0])
+
+        
+        # print(unique_ids)
+        filter_data = {key: value for (key, value) in filter_data.items() if value}
+        project_ids = ProjectModel\
             .query\
+            .with_entities(ProjectModel.id)\
             .filter_by(**filter_data)\
             .all()
         
-       
-      
+        for id in project_ids:
+            ids.append(id[0])
+
+        unique_ids = set(ids)
+        projects = ProjectModel\
+            .query\
+            .filter(ProjectModel.id.in_(ids))\
+            .all()
+        
+        
         return projects, 200
 
     @token_required
@@ -108,7 +154,6 @@ class Projects(Resource):
         new_filename = ''
         if args['image']:
             new_filename = upload_file(args['image'])
-        
         
         project = ProjectModel(\
             id = args['_id'],\
@@ -121,7 +166,6 @@ class Projects(Resource):
             website = args['website'],\
             old_filename = args['image'].filename,\
             new_filename = new_filename\
-
            )
 
         db.session.add(project)
@@ -172,7 +216,6 @@ class Projects(Resource):
             db.session.add(extra_tools)
             db.session.commit()
         
-
         return project, 200
 
     @token_required

@@ -6,6 +6,7 @@ class TeamMemberNameModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
+    project = db.relationship('ProjectModel',back_populates='name_team_member')
 
     def __repr__(self):
         return f"Team Member Name(\n\
